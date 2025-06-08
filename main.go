@@ -2,9 +2,12 @@ package main
 
 import (
 	"bufio"
-	"github.com/exgene/cuda-autocompletes/internal/rpc"
+	"encoding/json"
 	"log"
 	"os"
+
+	"github.com/exgene/cuda-autocompletes/internal/lsp"
+	"github.com/exgene/cuda-autocompletes/internal/rpc"
 )
 
 func main() {
@@ -20,13 +23,20 @@ func main() {
 }
 
 func handleMessage(msg []byte, logger *log.Logger) {
-	logger.Printf("Received msg:%v", msg)
+	// logger.Printf("Received msg:%s", string(msg))
 	method, content, err := rpc.DecodeMessage(msg)
 	if err != nil {
 		logger.Fatalf("Error while Decoding Message:\n %v", err)
-		return
 	}
-	logger.Printf("Parsed Successfully! method: %s, content: %s", method, string(content))
+
+	switch method {
+	case "initialize":
+		var request lsp.IntializeRequest
+		if err := json.Unmarshal(content, &request); err != nil {
+			logger.Fatalf("Error while Decoding IntializeRequest: \n%v", err)
+		}
+		logger.Printf("Version: %s, Name: %s", request.Params.ClientInfo.Version, request.Params.ClientInfo.Name)
+	}
 }
 
 func getLogger(filename string) *log.Logger {
