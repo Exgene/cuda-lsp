@@ -9,7 +9,7 @@ import (
 )
 
 type BaseMessage struct {
-	method string `json:"string"`
+	Method string `json:"method"`
 }
 
 func EncodeMessage(msg any) string {
@@ -28,17 +28,17 @@ func DecodeMessage(msg []byte) (string, []byte, error) {
 		return "", nil, errors.New("Invalid format :: Recieved no separator, Message:" + string(msg))
 	}
 
-	// Try to decode just for validation
 	contentLengthBytes := header[len("Content-Length: "):]
-	_, err := strconv.Atoi(string(contentLengthBytes))
+	contentLength, err := strconv.Atoi(string(contentLengthBytes))
 	if err != nil {
 		return "", nil, errors.New("Invalid format :: Invalid contentLength value, Message:" + string(msg))
 	}
 
 	var baseMessage BaseMessage
-	if err := json.Unmarshal(content, &baseMessage); err != nil {
+	if err := json.Unmarshal(content[:contentLength], &baseMessage); err != nil {
 		return "", nil, errors.New("Invalid format :: Invalid JSON Format, Message:" + string(msg))
 	}
+	fmt.Printf("%s", baseMessage.Method)
 
-	return baseMessage.method, contentLengthBytes, nil
+	return baseMessage.Method, content[:contentLength], nil
 }

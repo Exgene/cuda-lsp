@@ -1,8 +1,10 @@
 package encode_test
 
 import (
-	"github.com/exgene/cuda-autocompletes/internal/rpc"
+	"fmt"
 	"testing"
+
+	"github.com/exgene/cuda-autocompletes/internal/rpc"
 )
 
 type EncodingExample struct {
@@ -19,11 +21,11 @@ func TestEncode(t *testing.T) {
 }
 
 func TestDecode(t *testing.T) {
-	incomingMessage := "Content-Length: 16\r\n\r\n{\"Testing\":true}"
+	incomingMessage := "Content-Length: 16\r\n\r\n{\"method\":\"hey\"}"
 	method, content, err := rpc.DecodeMessage([]byte(incomingMessage))
 
 	expectedLength := 16
-	expectedMethodValue := "hi"
+	expectedMethodValue := "hey"
 
 	contentLength := len(content)
 	if err != nil {
@@ -32,6 +34,7 @@ func TestDecode(t *testing.T) {
 	if expectedLength != contentLength {
 		t.Fatalf("Decoded Length dont match! Original ::: %d === Actual ::: %d", expectedLength, contentLength)
 	}
+	fmt.Printf("Method:%s", method)
 	if expectedMethodValue != method {
 		t.Fatalf("Decoded Method Value dont match! Original ::: %s === Actual ::: %s", expectedMethodValue, method)
 	}
