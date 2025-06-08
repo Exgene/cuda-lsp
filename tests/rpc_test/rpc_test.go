@@ -17,3 +17,16 @@ func TestEncode(t *testing.T) {
 		t.Fatalf("Encoded values dont match! Original ::: %s === Actual ::: %s", expected, actual)
 	}
 }
+
+func TestDecode(t *testing.T) {
+	encodedMessage := rpc.EncodeMessage(EncodingExample{Testing: true})
+	contentLength, err := rpc.DecodeMessage([]byte(encodedMessage))
+	if err != nil {
+		t.Fatalf("Error while decoding message....%v", err)
+	}
+	expectedLength := 16
+
+	if expectedLength != contentLength {
+		t.Fatalf("Decoded Length dont match! Original ::: %d === Actual ::: %d", expectedLength, contentLength)
+	}
+}
