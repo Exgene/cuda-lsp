@@ -20,13 +20,19 @@ func TestEncode(t *testing.T) {
 
 func TestDecode(t *testing.T) {
 	incomingMessage := "Content-Length: 16\r\n\r\n{\"Testing\":true}"
-	contentLength, err := rpc.DecodeMessage([]byte(incomingMessage))
+	method, content, err := rpc.DecodeMessage([]byte(incomingMessage))
+
+	expectedLength := 16
+	expectedMethodValue := "hi"
+
+	contentLength := len(content)
 	if err != nil {
 		t.Fatalf("Error while decoding message....%v", err)
 	}
-	expectedLength := 16
-
 	if expectedLength != contentLength {
 		t.Fatalf("Decoded Length dont match! Original ::: %d === Actual ::: %d", expectedLength, contentLength)
+	}
+	if expectedMethodValue != method {
+		t.Fatalf("Decoded Method Value dont match! Original ::: %s === Actual ::: %s", expectedMethodValue, method)
 	}
 }
