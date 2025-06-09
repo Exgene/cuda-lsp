@@ -29,13 +29,20 @@ func handleMessage(msg []byte, logger *log.Logger) {
 		logger.Fatalf("Error while Decoding Message:\n %v", err)
 	}
 
+	logger.Printf("Recieved method: %s", method)
+
 	switch method {
 	case "initialize":
 		var request lsp.IntializeRequest
 		if err := json.Unmarshal(content, &request); err != nil {
 			logger.Fatalf("Error while Decoding IntializeRequest: \n%v", err)
 		}
-		logger.Printf("Version: %s, Name: %s", request.Params.ClientInfo.Version, request.Params.ClientInfo.Name)
+		logger.Printf("Connected to %s, %s", request.Params.ClientInfo.Name, request.Params.ClientInfo.Version)
+		writer := os.Stdout
+		msg := lsp.NewIntializeResponse(request.ID)
+		encodedMessage := rpc.EncodeMessage(msg)
+		writer.Write([]byte(encodedMessage))
+		logger.Print("Written to StdOut")
 	}
 }
 
