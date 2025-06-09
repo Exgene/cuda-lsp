@@ -8,7 +8,7 @@ type RequestMessage struct {
 
 type ResponseMessage struct {
 	RPC string `json:"jsonrpc"`
-	ID  *int    `json:"id,omitempty"`
+	ID  *int   `json:"id,omitempty"`
 }
 
 type Notification struct {
