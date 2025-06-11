@@ -23,7 +23,7 @@ func main() {
 }
 
 func handleMessage(msg []byte, logger *log.Logger) {
-	// logger.Printf("Received msg:%s", string(msg))
+	logger.Printf("Received msg:%s", string(msg))
 	method, content, err := rpc.DecodeMessage(msg)
 	if err != nil {
 		logger.Fatalf("Error while Decoding Message:\n %v", err)
