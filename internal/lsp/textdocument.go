@@ -3,6 +3,6 @@ package lsp
 type TextDocumentItem struct {
 	URI        string `json:"uri"`
 	LanguageId string `json:"languageId"`
-	Version    string `json:"version"`
+	Version    int    `json:"version"`
 	Text       string `json:"text"`
 }
