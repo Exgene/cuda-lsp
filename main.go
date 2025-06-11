@@ -41,8 +41,17 @@ func handleMessage(msg []byte, logger *log.Logger) {
 		writer := os.Stdout
 		msg := lsp.NewIntializeResponse(request.ID)
 		encodedMessage := rpc.EncodeMessage(msg)
+		logger.Printf("Encoded Msg: %s", encodedMessage)
 		writer.Write([]byte(encodedMessage))
 		logger.Print("Written to StdOut")
+
+	case "textDocument/didOpen":
+		var document lsp.DidOpenTextDocumentNotification
+		if err := json.Unmarshal(content, &document); err != nil {
+			logger.Fatalf("Error while Decoding IntializeRequest: \n%v", err)
+		}
+		logger.Printf("Document URI %s", document.Params.TextDocument.URI)
+		logger.Printf("%s", document.Params.TextDocument.Text)
 	}
 }
 
