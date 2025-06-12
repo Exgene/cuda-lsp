@@ -40,7 +40,7 @@ func NewIntializeResponse(id int) InitializeResponse {
 		},
 		Result: IntializeResult{
 			Capabilities: ServerCapabilities{
-				TextDocumentSync: 1,
+				TextDocumentSync: 2,
 			},
 			ServerInfo: ServerInfo{
 				Name:    "cuda",
