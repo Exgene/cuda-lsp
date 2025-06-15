@@ -67,25 +67,17 @@ func parseInput(text string) []string {
 }
 
 func (s *State) ApplyDiffs(document string, diffs Diffs) error {
-	log.Printf("ITS HERE MARDOIRAI")
-	// Currently lets only support single line diffs
-	if diffs.StartRange.Line != diffs.EndRange.Line {
-		return fmt.Errorf("Not implemented MultiLine Diffing:: StartRange: %d <==> EndRange: %d", diffs.StartRange.Line, diffs.EndRange.Line)
-	}
-
+	log.Printf("Running Diffs")
 	var currentDocument []string
 	currentDocument, ok := s.Documents[document]
 	if !ok {
 		return fmt.Errorf("Document Not found %s", document)
 	}
+
 	if diffs.Text == "" {
 		updatedDocument, err := deleteTextFromDocument(currentDocument, diffs)
 		if err != nil {
 			return fmt.Errorf("Error while deleting items from document: %s", document)
-		}
-		// TODO: Check if it was already empty, State management is so fucking hard
-		if len(updatedDocument) == 0 {
-			updatedDocument = slices.Delete(updatedDocument, diffs.EndRange.Line, diffs.EndRange.Line)
 		}
 		s.Documents[document] = updatedDocument
 	} else {
@@ -101,32 +93,50 @@ func (s *State) ApplyDiffs(document string, diffs Diffs) error {
 func updateTextFromDocument(currentDocument []string, diffs Diffs) ([]string, error) {
 	startCharacter := diffs.StartRange.Character
 	endCharacter := diffs.EndRange.Character
-	line := diffs.StartRange.Line
-
-	if line < 0 || line > len(currentDocument) {
-		return nil, fmt.Errorf("Out of Bounds")
+	startLine := diffs.StartRange.Line
+	endLine := diffs.EndRange.Line
+	if startLine == endLine && diffs.Text == "\n" {
+		// TODO: Implement this
+		log.Panic("Not Implemented")
 	}
-	lineToBeModified := currentDocument[line]
 
-	prefix := lineToBeModified[0:startCharacter]
-	middlePart := diffs.Text
-	suffix := lineToBeModified[endCharacter:]
-	currentDocument[line] = prefix + middlePart + suffix
+	if startLine == endLine {
+		lineToBeModified := currentDocument[startLine]
+		prefix := lineToBeModified[0:startCharacter]
+		middlePart := diffs.Text
+		suffix := lineToBeModified[endCharacter:]
+		currentDocument[startLine] = prefix + middlePart + suffix
+		return currentDocument, nil
+	}
+
 	return currentDocument, nil
 }
 
 func deleteTextFromDocument(currentDocument []string, diffs Diffs) ([]string, error) {
 	startCharacter := diffs.StartRange.Character
 	endCharacter := diffs.EndRange.Character
-	line := diffs.StartRange.Line
+	startLine := diffs.StartRange.Line
+	endLine := diffs.EndRange.Line
 
-	if line < 0 || line > len(currentDocument) {
-		return nil, fmt.Errorf("Out of Bounds")
+	// Dud Changes, TODO: Maybe bubble this up the chain to avoid overhead later
+	if startLine == endLine && startCharacter == endCharacter {
+		return currentDocument, nil
 	}
-	lineToBeModified := currentDocument[line]
-	n := len(lineToBeModified) - 1
-	log.Printf("Line to be modified %s", lineToBeModified)
 
-	currentDocument[line] = lineToBeModified[0:startCharacter] + lineToBeModified[endCharacter:n]
+	// Delete whole set of lines
+	if startLine < endLine && startCharacter == 0 && endCharacter == 0 {
+		return slices.Delete(currentDocument, startLine, endLine), nil
+	}
+
+	// Deletes Characters (In betweens)
+	if startLine == endLine && startCharacter < endCharacter {
+		n := len(currentDocument[startLine])
+		s1 := currentDocument[startLine][0:startCharacter]
+		s2 := currentDocument[startLine][endCharacter:n]
+		currentDocument[startLine] = s1 + s2
+		return currentDocument, nil
+	}
+
+	// Other operations pending...
 	return currentDocument, nil
 }
