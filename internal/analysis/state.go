@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"slices"
+
+	"github.com/exgene/cuda-autocompletes/internal/lsp"
 )
 
 type Diffs struct {
@@ -17,17 +19,17 @@ type Range struct {
 	Character int
 }
 
-func NewDiff() Diffs {
+func NewDiff(change lsp.TextDocumentContentChangeEvent) Diffs {
 	return Diffs{
 		StartRange: Range{
-			Line:      0,
-			Character: 0,
+			Line:      change.Range.Start.Line,
+			Character: change.Range.Start.Character,
 		},
 		EndRange: Range{
-			Line:      0,
-			Character: 0,
+			Line:      change.Range.End.Line,
+			Character: change.Range.End.Character,
 		},
-		Text: "",
+		Text: change.Text,
 	}
 }
 

@@ -83,26 +83,17 @@ func handleMessage(msg []byte, state analysis.State) {
 			log.Printf("Recieved Diffs to update Document, Diffed End Line :: %d", change.Range.End.Line)
 			log.Printf("Recieved Diffs to update Document, Diffed End Character :: %d", change.Range.End.Character)
 			log.Printf("<----------------------->")
-			diff := analysis.NewDiff()
+			diff := analysis.NewDiff(change)
 
-			diff.StartRange.Line = change.Range.Start.Line
-			diff.StartRange.Character = change.Range.Start.Character
-			diff.EndRange.Line = change.Range.End.Line
-			diff.EndRange.Character = change.Range.End.Character
-			diff.Text = change.Text
-
-			// log.Printf("Starting to apply diffs")
-			// err := state.ApplyDiffs(document.Params.TextDocument.URI, diff)
-			// if err != nil {
-			// 	log.Printf("Error while Applying Diffs %v", err)
-			// 	break
-			// }
-			// for _, values := range state.Documents[document.Params.TextDocument.URI] {
-			// 	fmt.Printf("%s\n", values)
-			// }
+			log.Printf("Starting to apply diffs")
+			err := state.ApplyDiffs(document.Params.TextDocument.URI, diff)
+			if err != nil {
+				log.Printf("Error while Applying Diffs %v", err)
+				break
+			}
 		}
-		// for _, v := range state.Documents[document.Params.TextDocument.URI] {
-		// 	log.Printf("Diffs Updated, The new document state looks like: %s", v)
-		// }
+		for _, values := range state.Documents[document.Params.TextDocument.URI] {
+			log.Printf("%s\n", values)
+		}
 	}
 }
