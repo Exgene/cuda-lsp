@@ -1,8 +1,9 @@
 package analysis
 
 import (
-	"errors"
 	"fmt"
+	"log"
+	"slices"
 )
 
 type Diffs struct {
@@ -41,10 +42,31 @@ func NewState() State {
 }
 
 func (s *State) OpenDocument(document, data string) {
-	s.Documents[document] = append(s.Documents[document], data)
+	s.Documents[document] = parseInput(data)
+}
+
+func parseInput(text string) []string {
+	output := []string{}
+	initialPos := 0
+	for i, char := range text {
+		if char == '\n' {
+			// I want to skip empty lines, But we cant do that cause it will mess up the order, Also Edits, Does it include \n characters?
+			// if i+1 == initialPos {
+			// 	continue
+			// }
+			output = append(output, text[initialPos:i])
+			initialPos = i + 1
+		}
+	}
+	if len(output) == 0 {
+		return append(output, text)
+	}
+	return output
 }
 
 func (s *State) ApplyDiffs(document string, diffs Diffs) error {
+	log.Printf("ITS HERE MARDOIRAI")
+	// Currently lets only support single line diffs
 	if diffs.StartRange.Line != diffs.EndRange.Line {
 		return fmt.Errorf("Not implemented MultiLine Diffing:: StartRange: %d <==> EndRange: %d", diffs.StartRange.Line, diffs.EndRange.Line)
 	}
@@ -54,11 +76,14 @@ func (s *State) ApplyDiffs(document string, diffs Diffs) error {
 	if !ok {
 		return fmt.Errorf("Document Not found %s", document)
 	}
-	// Currently lets only support single line diffs
 	if diffs.Text == "" {
 		updatedDocument, err := deleteTextFromDocument(currentDocument, diffs)
 		if err != nil {
 			return fmt.Errorf("Error while deleting items from document: %s", document)
+		}
+		// TODO: Check if it was already empty, State management is so fucking hard
+		if len(updatedDocument) == 0 {
+			updatedDocument = slices.Delete(updatedDocument, diffs.EndRange.Line, diffs.EndRange.Line)
 		}
 		s.Documents[document] = updatedDocument
 	} else {
@@ -97,9 +122,9 @@ func deleteTextFromDocument(currentDocument []string, diffs Diffs) ([]string, er
 		return nil, fmt.Errorf("Out of Bounds")
 	}
 	lineToBeModified := currentDocument[line]
+	n := len(lineToBeModified) - 1
+	log.Printf("Line to be modified %s", lineToBeModified)
 
-	prefix := lineToBeModified[0:startCharacter]
-	suffix := lineToBeModified[endCharacter:]
-	currentDocument[line] = prefix + suffix
+	currentDocument[line] = lineToBeModified[0:startCharacter] + lineToBeModified[endCharacter:n]
 	return currentDocument, nil
 }
