@@ -90,14 +90,32 @@ func (s *State) ApplyDiffs(document string, diffs Diffs) error {
 	return nil
 }
 
+func addLineIntoDocument(currentDocument []string, index int) ([]string, error) {
+	if index < 0 {
+		index = 0
+	}
+	return slices.Insert(currentDocument, index, ""), nil
+}
+
 func updateTextFromDocument(currentDocument []string, diffs Diffs) ([]string, error) {
 	startCharacter := diffs.StartRange.Character
 	endCharacter := diffs.EndRange.Character
 	startLine := diffs.StartRange.Line
 	endLine := diffs.EndRange.Line
-	if startLine == endLine && diffs.Text == "\n" {
+
+	if diffs.Text == "\n" &&
+		(startLine == endLine && startCharacter == endCharacter) ||
+		(startLine == endLine-1) {
+		return addLineIntoDocument(currentDocument, endLine-1)
+	}
+
+	// if diffs.Text == "\n" &&
+	// 	(startCharacter == 0 && endCharacter == 0) {
+	// }
+
+	if diffs.Text == "\n" && startLine < endLine {
 		// TODO: Implement this
-		log.Panic("Not Implemented")
+		log.Panic("This is for multi line additions and i give up for now")
 	}
 
 	if startLine == endLine {
