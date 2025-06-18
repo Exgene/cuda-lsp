@@ -103,15 +103,33 @@ func updateTextFromDocument(currentDocument []string, diffs Diffs) ([]string, er
 	startLine := diffs.StartRange.Line
 	endLine := diffs.EndRange.Line
 
-	if diffs.Text == "\n" &&
-		(startLine == endLine && startCharacter == endCharacter) ||
-		(startLine == endLine-1) {
-		return addLineIntoDocument(currentDocument, endLine-1)
-	}
+	log.Printf("%d == %d, %d == 18, %d == 0", startLine, endLine-1, len(currentDocument[startLine]), endCharacter)
+	// Inserting new line characters
+	log.Printf("%q", diffs.Text)
+	if diffs.Text == "\n" || diffs.Text == "\r\n" || diffs.Text == "\n\n" {
+		log.Print("Inside \\n")
+		// insert below
+		if startLine == endLine &&
+			startCharacter == len(currentDocument[startLine]) &&
+			endCharacter == len(currentDocument[startLine]) {
+			log.Print("Below 1")
 
-	// if diffs.Text == "\n" &&
-	// 	(startCharacter == 0 && endCharacter == 0) {
-	// }
+			return addLineIntoDocument(currentDocument, endLine+1)
+		}
+
+		log.Printf("%d == %d, %d == 18, %d == 0", startLine, endLine-1, len(currentDocument[startLine]), endCharacter)
+		if startLine == endLine-1 && startCharacter == len(currentDocument[startLine]) && endCharacter == 0 {
+			log.Print("Below 2")
+			return addLineIntoDocument(currentDocument, endLine+1)
+		}
+		// insert above
+		if startLine == endLine-1 && endCharacter == len(currentDocument[endCharacter]) && startCharacter == 0 {
+			return addLineIntoDocument(currentDocument, startLine)
+		}
+		if startLine == 0 && endLine == 0 && endCharacter == 0 && startCharacter == 0 {
+			return addLineIntoDocument(currentDocument, startLine)
+		}
+	}
 
 	if diffs.Text == "\n" && startLine < endLine {
 		// TODO: Implement this
