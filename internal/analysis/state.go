@@ -47,6 +47,19 @@ func (s *State) OpenDocument(document, data string) {
 	s.Documents[document] = parseInput(data)
 }
 
+func (s *State) GetTextFromDocument(document string) string {
+	return unwind(s.Documents[document])
+}
+
+func unwind(document []string) string {
+	constructedString := ""
+	for _, line := range document {
+		constructedString += line
+		constructedString += "\n"
+	}
+	return constructedString
+}
+
 func parseInput(text string) []string {
 	output := []string{}
 	initialPos := 0
