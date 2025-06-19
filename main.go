@@ -91,6 +91,8 @@ func handleMessage(msg []byte, state analysis.State) {
 				log.Printf("Error while Applying Diffs %v", err)
 				break
 			}
+
+			state.NewParseJob()
 		}
 		for _, values := range state.Documents[document.Params.TextDocument.URI] {
 			log.Printf("%s\n", values)
