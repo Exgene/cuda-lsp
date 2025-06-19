@@ -4,15 +4,6 @@ import (
 	"fmt"
 )
 
-func NewTokenizer(source string) *Tokenizer {
-	return &Tokenizer{
-		src_code: source,
-		idx:      0,
-		tokens:   make([]Token, 0),
-		buf:      "",
-	}
-}
-
 func (t TokenType) String() string {
 	switch t {
 	case Identifier:
@@ -20,10 +11,6 @@ func (t TokenType) String() string {
 	default:
 		return fmt.Sprintf("Unknown(%d)", int(t))
 	}
-}
-
-func (t Token) String() string {
-	return fmt.Sprintf("Token{Type: %v, Value: %v}", t.Kind, t.Value)
 }
 
 func Tokenize(code string) {
