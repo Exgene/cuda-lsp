@@ -34,21 +34,20 @@ func NewDiff(change lsp.TextDocumentContentChangeEvent) Diffs {
 }
 
 type State struct {
-	Documents map[string][]string
+	Documents     map[string][]string
+	CurrentBuffer string
 }
 
 func NewState() State {
 	return State{
-		Documents: map[string][]string{},
+		Documents:     map[string][]string{},
+		CurrentBuffer: "",
 	}
 }
 
 func (s *State) OpenDocument(document, data string) {
 	s.Documents[document] = parseInput(data)
-}
-
-func (s *State) GetTextFromDocument(document string) string {
-	return unwind(s.Documents[document])
+	s.CurrentBuffer = unwind(s.Documents[document])
 }
 
 func unwind(document []string) string {
@@ -100,6 +99,8 @@ func (s *State) ApplyDiffs(document string, diffs Diffs) error {
 		}
 		s.Documents[document] = updatedDocument
 	}
+	// Set the current buffer to the updated document (unwinded)
+	s.CurrentBuffer = unwind(s.Documents[document])
 	return nil
 }
 
