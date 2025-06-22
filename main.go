@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"log"
 	"os"
 
@@ -14,6 +15,7 @@ import (
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	state := analysis.NewState()
+	writer := os.Stdout
 
 	logFile, err := os.OpenFile("/home/kausthubh/GitHub/cuda-autocompletes/log.txt", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 	if err != nil {
@@ -29,12 +31,18 @@ func main() {
 	scanner.Split(rpc.Split)
 	for scanner.Scan() {
 		msg := scanner.Bytes()
-		handleMessage(msg, state)
+		handleMessage(msg, state, writer)
 	}
 	defer logFile.Close()
 }
 
-func handleMessage(msg []byte, state analysis.State) {
+func writeMessage(msg any, writer io.Writer) {
+	encodedMessage := rpc.EncodeMessage(msg)
+	writer.Write([]byte(encodedMessage))
+	log.Printf("Encoded Msg: %s", encodedMessage)
+}
+
+func handleMessage(msg []byte, state analysis.State, writer io.Writer) {
 	// logger.Printf("Received msg:%s", string(msg))
 	method, content, err := rpc.DecodeMessage(msg)
 	if err != nil {
@@ -47,20 +55,26 @@ func handleMessage(msg []byte, state analysis.State) {
 	case "initialize":
 		var request lsp.IntializeRequest
 		if err := json.Unmarshal(content, &request); err != nil {
-			log.Fatalf("Error while Decoding IntializeRequest: \n%v", err)
+			log.Fatalf("Error unmarshalling intialize: %v", err)
 		}
 		log.Printf("Connected to %s, %s", request.Params.ClientInfo.Name, request.Params.ClientInfo.Version)
-		writer := os.Stdout
 		msg := lsp.NewIntializeResponse(request.ID)
-		encodedMessage := rpc.EncodeMessage(msg)
-		log.Printf("Encoded Msg: %s", encodedMessage)
-		writer.Write([]byte(encodedMessage))
+		writeMessage(msg, writer)
+		log.Print("Written to StdOut")
+
+	case "textDocument/hover":
+		var request lsp.HoverRequest
+		if err := json.Unmarshal(content, &request); err != nil {
+			log.Fatalf("Error unmarshalling textDocument/hover: %v", err)
+		}
+		msg := lsp.NewIntializeHoverResponse(request.Request.ID)
+		writeMessage(msg, writer)
 		log.Print("Written to StdOut")
 
 	case "textDocument/didOpen":
 		var document lsp.DidOpenTextDocumentNotification
 		if err := json.Unmarshal(content, &document); err != nil {
-			log.Fatalf("Error while Decoding IntializeRequest: \n%v", err)
+			log.Fatalf("Error unmarshalling textDocument/didOpen: %v", err)
 		}
 		log.Printf("Document URI %s", document.Params.TextDocument.URI)
 		// log.Printf("%s", document.Params.TextDocument.Text)
@@ -73,7 +87,7 @@ func handleMessage(msg []byte, state analysis.State) {
 	case "textDocument/didChange":
 		var document lsp.DidChangeTextDocumentNotification
 		if err := json.Unmarshal(content, &document); err != nil {
-			log.Fatalf("Error while Decoding IntializeRequest: \n%v", err)
+			log.Fatalf("Error unmarshalling textDocument/didChange: %v", err)
 		}
 		for _, change := range document.Params.ContentChanges {
 			log.Printf("<----------------------->")
