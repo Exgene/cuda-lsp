@@ -14,7 +14,7 @@ func isSkippable(char rune) bool {
 	return unicode.IsSpace(char)
 }
 
-func isKeyword(word string) (TokenType, bool) {
+func isKeyword(word string) (CudaTokenType, bool) {
 	keyword, exists := keywords[word]
 	return keyword, exists
 }

@@ -1,20 +1,32 @@
 package lexer
 
-type TokenType int
+type CudaTokenType int
 
 const (
-	Identifier TokenType = iota
+	CUDA CudaTokenType = iota
+	Identifier
 	EOF
-	CUDA
+	Global
+	Device
+	ThreadIdx
+	BlockIdx
+	BlockDim
+	GridDim
 )
 
-var keywords = map[string]TokenType{
+var keywords = map[string]CudaTokenType{
 	// Here i define my cuda tokens
-	"cuda": CUDA,
+	"cuda":       CUDA,
+	"__global__": Global,
+	"__device__": Device,
+	"threadIdx":  ThreadIdx,
+	"blockIdx":   BlockIdx,
+	"blockDim":   BlockDim,
+	"gridDim":    GridDim,
 }
 
 type Token struct {
-	Kind  TokenType
+	Kind  CudaTokenType
 	Value string
 }
 

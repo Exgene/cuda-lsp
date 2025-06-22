@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func (t TokenType) String() string {
+func (t CudaTokenType) String() string {
 	switch t {
 	case Identifier:
 		return "Identifier"
@@ -33,6 +33,6 @@ func (t *Tokenizer) ScanTokens() []Token {
 		}
 	}
 
-	t.addToTokensArray(Token{TokenType(EOF), ""})
+	t.addToTokensArray(Token{CudaTokenType(EOF), ""})
 	return t.tokens
 }
