@@ -1,7 +1,7 @@
 package lsp
 
 type IntializeRequest struct {
-	RequestMessage
+	Request
 	Params IntializeParams `json:"params"`
 }
 
@@ -15,7 +15,7 @@ type ClientInfo struct {
 }
 
 type InitializeResponse struct {
-	ResponseMessage
+	Response
 	Result IntializeResult `json:"result"`
 }
 
@@ -25,8 +25,10 @@ type IntializeResult struct {
 }
 
 type ServerCapabilities struct {
-	TextDocumentSync int `json:"textDocumentSync"`
+	TextDocumentSync int  `json:"textDocumentSync"`
+	HoverProvider    bool `json:"hoverProvider"`
 }
+
 type ServerInfo struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
@@ -34,13 +36,14 @@ type ServerInfo struct {
 
 func NewIntializeResponse(id int) InitializeResponse {
 	return InitializeResponse{
-		ResponseMessage: ResponseMessage{
+		Response: Response{
 			RPC: "2.0",
 			ID:  &id,
 		},
 		Result: IntializeResult{
 			Capabilities: ServerCapabilities{
 				TextDocumentSync: 2,
+				HoverProvider:    true,
 			},
 			ServerInfo: ServerInfo{
 				Name:    "cuda",
