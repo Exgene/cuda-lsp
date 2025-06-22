@@ -7,9 +7,13 @@ import (
 )
 
 func (s *State) NewParseJob() {
+	log.Printf("Current Buffer State: %s", s.CurrentBuffer)
 	parser := lexer.NewTokenizer(s.CurrentBuffer)
+	log.Println("Scanning Toknes!")
 	tokens := parser.ScanTokens()
+	log.Printf("Length of tokens recieved: %d", len(tokens))
 	for _, token := range tokens {
-		log.Printf("Token:%v", token)
+		log.Printf("Token Type : %v", token.Kind)
+		log.Printf("Token Value : %s", token.Value)
 	}
 }
