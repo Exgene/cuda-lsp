@@ -5,10 +5,12 @@ type TokenType int
 const (
 	Identifier TokenType = iota
 	EOF
+	CUDA
 )
 
 var keywords = map[string]TokenType{
 	// Here i define my cuda tokens
+	"cuda": CUDA,
 }
 
 type Token struct {

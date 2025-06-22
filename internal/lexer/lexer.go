@@ -8,6 +8,10 @@ func (t TokenType) String() string {
 	switch t {
 	case Identifier:
 		return "Identifier"
+	case EOF:
+		return "EOF"
+	case CUDA:
+		return "Cuda"
 	default:
 		return fmt.Sprintf("Unknown(%d)", int(t))
 	}
