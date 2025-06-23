@@ -5,6 +5,7 @@ import (
 	"log"
 	"slices"
 
+	"github.com/exgene/cuda-autocompletes/internal/lexer"
 	"github.com/exgene/cuda-autocompletes/internal/lsp"
 )
 
@@ -36,17 +37,20 @@ func NewDiff(change lsp.TextDocumentContentChangeEvent) Diffs {
 type State struct {
 	Documents     map[string][]string
 	CurrentBuffer string
+	Tokens        map[string][]lexer.Token
 }
 
 func NewState() State {
 	return State{
 		Documents:     map[string][]string{},
 		CurrentBuffer: "",
+		Tokens:        map[string][]lexer.Token{},
 	}
 }
 
 func (s *State) OpenDocument(document, data string) {
 	s.Documents[document] = parseInput(data)
+	s.Tokens[document] = s.NewParseJob()
 	s.CurrentBuffer = unwind(s.Documents[document])
 }
 
@@ -78,6 +82,16 @@ func (s *State) GetToken(document string, position lsp.Position) string {
 	}
 
 	return processed(string(token))
+}
+
+func (s *State) ValidToken(t, document string) *lexer.Token {
+	for _, token := range s.Tokens[document] {
+		log.Printf("Tokens:%s", token.Kind.String())
+		if token.Value == t {
+			return &token
+		}
+	}
+	return nil
 }
 
 // Future support for escaped strings ig, Most probably not needed

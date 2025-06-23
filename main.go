@@ -72,7 +72,22 @@ func handleMessage(msg []byte, state analysis.State, writer io.Writer) {
 		token := state.GetToken(request.Params.TextDocument.URI, request.Params.Position)
 		log.Printf("Token Hovered: %s", token)
 		// log.Print("THIS IS SO FUCKING HARD THAN IT NEEDS TO BE ARGH")
-		msg := lsp.NewIntializeHoverResponse(request.Request.ID, token)
+		// Done ToT
+
+		/*
+			Ideally you would have some sort of dicitionary of all the available tokens parsed through parseJob()
+			Then you have its relative position encoded. Then when hovered you round it to the relative position
+			If its an interested token you directly return its information. But I Aint doin allat type shit. Tbh i can
+			But i wanna learn CUDA. Thats the whole point of this thing.
+		*/
+
+		t := state.ValidToken(token, request.Params.TextDocument.URI)
+		if t == nil {
+			log.Printf("No Token Found so no hover for you")
+			return
+		}
+
+		msg := lsp.NewIntializeHoverResponse(request.Request.ID, t.Kind.String())
 		writeMessage(msg, writer)
 		log.Print("Written to StdOut")
 
@@ -111,7 +126,7 @@ func handleMessage(msg []byte, state analysis.State, writer io.Writer) {
 				break
 			}
 
-			state.NewParseJob()
+			state.Tokens[document.Params.TextDocument.URI] = state.NewParseJob()
 		}
 		for _, values := range state.Documents[document.Params.TextDocument.URI] {
 			log.Printf("%s\n", values)
