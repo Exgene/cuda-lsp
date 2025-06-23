@@ -50,6 +50,42 @@ func (s *State) OpenDocument(document, data string) {
 	s.CurrentBuffer = unwind(s.Documents[document])
 }
 
+func (s *State) GetToken(document string, position lsp.Position) string {
+	lineIdx := position.Line
+	characterIdx := position.Character
+	line := s.Documents[document][lineIdx]
+	var token []rune
+	i := characterIdx
+	j := characterIdx
+
+	token = append(token, rune(line[i]))
+
+	// Advance first before consuming
+	i -= 1
+	j += 1
+
+	for i >= 0 && !isEscapeCharacter(rune(line[i])) {
+		log.Printf("i_value:%s, i_index:%d", string(line[i]), i)
+		token = slices.Insert(token, 0, rune(line[i]))
+		i -= 1
+	}
+
+	for j < len(line) && !isEscapeCharacter(rune(line[j])) {
+		log.Printf("j_value:%s, j_index:%d", string(line[j]), j)
+		token = append(token, rune(line[j]))
+		j += 1
+	}
+
+	return string(token)
+}
+
+func isEscapeCharacter(l rune) bool {
+	if l == '\n' || l == '\r' || l == ' ' {
+		return true
+	}
+	return false
+}
+
 func unwind(document []string) string {
 	constructedString := ""
 	for _, line := range document {

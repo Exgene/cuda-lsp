@@ -67,7 +67,12 @@ func handleMessage(msg []byte, state analysis.State, writer io.Writer) {
 		if err := json.Unmarshal(content, &request); err != nil {
 			log.Fatalf("Error unmarshalling textDocument/hover: %v", err)
 		}
-		msg := lsp.NewIntializeHoverResponse(request.Request.ID)
+		log.Printf("Recieved Character Position: %d", request.Params.Position.Character)
+		log.Printf("Recieved Line Position: %d", request.Params.Position.Line)
+		token := state.GetToken(request.Params.TextDocument.URI, request.Params.Position)
+		log.Printf("Token Hovered: %s", token)
+		// log.Print("THIS IS SO FUCKING HARD THAN IT NEEDS TO BE ARGH")
+		msg := lsp.NewIntializeHoverResponse(request.Request.ID, token)
 		writeMessage(msg, writer)
 		log.Print("Written to StdOut")
 
