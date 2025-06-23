@@ -50,6 +50,7 @@ func (s *State) OpenDocument(document, data string) {
 	s.CurrentBuffer = unwind(s.Documents[document])
 }
 
+// Leetcode type shi (Two Pointer Fine Shi)
 func (s *State) GetToken(document string, position lsp.Position) string {
 	lineIdx := position.Line
 	characterIdx := position.Character
