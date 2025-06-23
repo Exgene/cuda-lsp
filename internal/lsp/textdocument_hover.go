@@ -18,14 +18,14 @@ type HoverResult struct {
 	Contents string `json:"contents"`
 }
 
-func NewIntializeHoverResponse(requestId int) HoverResponse {
+func NewIntializeHoverResponse(requestId int, content string) HoverResponse {
 	return HoverResponse{
 		Response: Response{
 			RPC: "2.0",
 			ID:  &requestId,
 		},
 		Result: HoverResult{
-			Contents: "Hello World",
+			Contents: content,
 		},
 	}
 }
