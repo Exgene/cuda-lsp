@@ -76,7 +76,18 @@ func (s *State) GetToken(document string, position lsp.Position) string {
 		j += 1
 	}
 
-	return string(token)
+	return processed(string(token))
+}
+
+// Future support for escaped strings ig, Most probably not needed
+// TODO: Deprecate this shit
+func processed(t string) string {
+	switch t {
+	case "#":
+		return `\#`
+	default:
+		return t
+	}
 }
 
 func isEscapeCharacter(l rune) bool {
