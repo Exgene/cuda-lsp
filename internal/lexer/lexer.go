@@ -10,8 +10,8 @@ func (t CudaTokenType) String() string {
 		return "Identifier"
 	case EOF:
 		return "EOF"
-	case CUDA:
-		return "Cuda"
+	case BlockDim:
+		return "BlockDimension"
 	default:
 		return fmt.Sprintf("Unknown(%d)", int(t))
 	}

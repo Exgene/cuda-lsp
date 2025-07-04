@@ -48,10 +48,12 @@ func NewState() State {
 	}
 }
 
+var documentation = map[lexer.CudaTokenType]string{}
+
 func (s *State) OpenDocument(document, data string) {
 	s.Documents[document] = parseInput(data)
-	s.Tokens[document] = s.NewParseJob()
 	s.CurrentBuffer = unwind(s.Documents[document])
+	s.Tokens[document] = s.NewParseJob()
 }
 
 // Leetcode type shi (Two Pointer Fine Shi)
@@ -69,6 +71,17 @@ func (s *State) GetToken(document string, position lsp.Position) string {
 	i -= 1
 	j += 1
 
+	for i >= 0 &&
+		j < len(line) &&
+		!isEscapeCharacter(rune(line[j])) &&
+		!isEscapeCharacter(rune(line[i])) {
+
+		token = slices.Insert(token, 0, rune(line[i]))
+		token = append(token, rune(line[j]))
+		i -= 1
+		j += 1
+	}
+
 	for i >= 0 && !isEscapeCharacter(rune(line[i])) {
 		log.Printf("i_value:%s, i_index:%d", string(line[i]), i)
 		token = slices.Insert(token, 0, rune(line[i]))
@@ -85,6 +98,15 @@ func (s *State) GetToken(document string, position lsp.Position) string {
 }
 
 func (s *State) ValidToken(t, document string) *lexer.Token {
+	/*
+		Basically what you do instead is have a map between the TokenType(Or CudaTokenType whatever bruh) to the actual
+		documentation of the hover thingy. For now thats fine, Later you can also do the parseJob() to do scope res, Allow operator chaining. Etc
+	*/
+
+	/*
+		Ig operator chaining where if i hover over threadIdx vs if i hover over threadIdx.x would be an
+		interesting problem to solve. I think to solve it you need uh some sort of real parser ahhahaha
+	*/
 	for _, token := range s.Tokens[document] {
 		log.Printf("Tokens:%s", token.Kind.String())
 		if token.Value == t {
